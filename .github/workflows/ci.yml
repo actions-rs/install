@@ -16,3 +16,17 @@ jobs:
       - run: npm run lint
       - run: npm run build
       - run: npm run test
+
+  install:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        crate:
+          - cross  # Available in the tool cache
+          - ripgrep  # Not available in the tool cache
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./
+        with:
+          crate: ${{ matrix.crate }}
