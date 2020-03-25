@@ -1,5 +1,5 @@
 import os from "os";
-import { promises as fs } from 'fs';
+import { promises as fs } from "fs";
 import path from "path";
 
 import * as core from "@actions/core";
