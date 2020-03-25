@@ -1,5 +1,5 @@
 import os from "os";
-import fs from "fs";
+import { promises as fs } from 'fs';
 import path from "path";
 
 import * as core from "@actions/core";
@@ -69,10 +69,12 @@ export async function downloadFromCache(
     const url = buildUrl(crate, version);
     const path = targetPath(crate);
 
-    if (fs.existsSync(path)) {
-        core.warning(`Crate ${crate} already exist at ${path}`);
-        return;
-    }
+    try {
+        await fs.access(path);
 
-    await tc.downloadTool(url, path);
+        core.warning(`Crate ${crate} already exist at ${path}`);
+    } catch (error) {
+        await tc.downloadTool(url, path);
+        await fs.chmod(path, 0o755);
+    }
 }
