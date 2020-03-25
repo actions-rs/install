@@ -17,16 +17,25 @@ jobs:
       - run: npm run build
       - run: npm run test
 
-  install:
+  install_from_tool_cache:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        crate:
-          - cross  # Available in the tool cache
-          - ripgrep  # Not available in the tool cache
     steps:
       - uses: actions/checkout@v2
       - uses: ./
         with:
-          crate: ${{ matrix.crate }}
+          crate: cross
+      # To this point `cross` should be available
+      # and `cargo` command will not attempt to install it once again
+      - uses: actions-rs/cargo@v1
+        with:
+          command: check
+          use-cross: true
+
+  install_missing_from_tool_cache:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./
+        with:
+          crate: bat
+      - run: bat package.json
