@@ -1,0 +1,50 @@
+{
+  "name": "rust-cargo-install",
+  "version": "0.0.0",
+  "description": "Install a Rust binary as fast as possible",
+  "main": "lib/main.js",
+  "scripts": {
+    "build": "rm -rf ./dist/* && ncc build src/main.ts --minify",
+    "format": "prettier --write 'src/**/*.ts' '__tests__/**/*.ts'",
+    "lint": "tsc --noEmit && eslint 'src/**/*.ts' '__tests__/**/*.ts'",
+    "watch": "rm -rf ./dist/* && ncc build src/main.ts --watch",
+    "test": "jest -c jest.config.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/actions-rs/install.git"
+  },
+  "keywords": [
+    "actions",
+    "rust",
+    "cargo",
+    "install",
+    "binary"
+  ],
+  "author": "actions-rs",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/actions-rs/install/issues"
+  },
+  "homepage": "https://github.com/actions-rs/install",
+  "dependencies": {
+    "@actions-rs/core": "0.0.9",
+    "@actions/core": "^1.2.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^25.1.4",
+    "@types/node": "^13.9.3",
+    "@typescript-eslint/eslint-plugin": "^2.25.0",
+    "@typescript-eslint/parser": "^2.25.0",
+    "@zeit/ncc": "^0.22.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-plugin-prettier": "^3.1.2",
+    "jest": "^25.1.0",
+    "jest-circus": "^25.1.0",
+    "npm-check-updates": "^4.0.5",
+    "prettier": "^2.0.2",
+    "ts-jest": "^25.2.1",
+    "typescript": "^3.8.3"
+  }
+}
