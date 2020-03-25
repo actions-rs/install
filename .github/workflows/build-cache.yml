@@ -22,6 +22,9 @@ jobs:
           - sccache
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
       - name: Build and upload binary crate
         run: |
           python3 -m pip install -r ci/requirements.txt
