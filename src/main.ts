@@ -1,6 +1,8 @@
 import * as core from "@actions/core";
 
-export async function run(): Promise<void> {}
+export async function run(): Promise<void> {
+    core.info("All done");
+}
 
 async function main(): Promise<void> {
     try {
