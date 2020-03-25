@@ -23,13 +23,8 @@ jobs:
       - uses: actions/checkout@v2
       - uses: ./
         with:
-          crate: cross
-      # To this point `cross` should be available
-      # and `cargo` command will not attempt to install it once again
-      - uses: actions-rs/cargo@v1
-        with:
-          command: check
-          use-cross: true
+          crate: sccache
+      - run: sccache --help
 
   install_missing_from_tool_cache:
     runs-on: ubuntu-latest
