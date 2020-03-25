@@ -89,3 +89,7 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+# CI build stuff
+ci/venv
+ci/build

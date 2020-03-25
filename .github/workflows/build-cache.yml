@@ -1,0 +1,29 @@
+name: Populate build cache
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - windows-2019
+          - ubuntu-18.04
+          - macos-10.15
+        crate:
+          - cargo-audit
+          - cargo-udeps
+          - cargo-nono
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build and upload binary crate
+        run:
+          python -m pip install -r ci/requirements.txt
+          python ci/build.py
+        env:
+          CRATE: ${{ matrix.crate }}
+          RUNNER: ${{ matrix.os }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
