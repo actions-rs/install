@@ -18,7 +18,14 @@ jobs:
       - run: npm run test
 
   install_from_tool_cache:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-16.04
+          - macOS-latest
+          - windows-latest
     steps:
       - uses: actions/checkout@v2
       - name: Install sccache

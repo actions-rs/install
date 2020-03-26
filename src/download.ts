@@ -33,7 +33,9 @@ function getExt(): string {
 
 async function resolveVersion(crate: string): Promise<string> {
     const url = `https://crates.io/api/v1/crates/${crate}`;
-    const client = new http.HttpClient("@actions-rs (https://github.com/actions-rs/)");
+    const client = new http.HttpClient(
+        "@actions-rs (https://github.com/actions-rs/)"
+    );
 
     const resp: any = await client.getJson(url);
     if (resp.result == null) {
@@ -61,6 +63,8 @@ function buildUrl(crate: string, version: string): string {
     const s3Bucket = "actions-rs.install.binary-cache";
     const runner = getRunner();
     const ext = getExt();
+
+    core.debug(`Determined current Actions runner OS: ${runner}`);
 
     return `https://s3.${s3Region}.amazonaws.com/${s3Bucket}/${crate}/${runner}/${crate}-${version}${ext}`;
 }
