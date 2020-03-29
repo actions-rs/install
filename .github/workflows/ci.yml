@@ -18,6 +18,7 @@ jobs:
       - run: npm run test
 
   install_from_tool_cache:
+    needs: test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -32,9 +33,22 @@ jobs:
         uses: ./
         with:
           crate: sccache
+          use-tool-cache: true
+      - run: sccache --help
+
+  disabled_tool_cache:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install sccache
+        uses: ./
+        with:
+          crate: sccache
       - run: sccache --help
 
   install_missing_from_tool_cache:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -42,4 +56,5 @@ jobs:
         uses: ./
         with:
           crate: bat
+          use-tool-cache: true
       - run: bat package.json

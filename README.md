@@ -8,28 +8,32 @@
 
 This GitHub Action provides faster version of the `cargo install` command.
 
-⚠ ️**NOTE: Work on this Action is still in progress, no guarantees on stability, correctness or security are provided right now.** ⚠
+⚠ ️**NOTE: This is an experimental Action.** ⚠
 
 **Table of Contents**
 
 * [How does this works?](#how-does-it-work)
 * [Example workflow](#example-workflow)
 * [Inputs](#inputs)
-* [Security considerations](#security-considerations)
+* [Tool cache](#tool-cache)
+    * [Security considerations](#security-considerations)
+* [GitHub cache](#github-cache)
 * [License](#license)
 * [Contribute and support](#contribute-and-support)
 
 ## How does it work?
 
-1. Most popular binary crates used in Rust CI are selected for the speed-up installation
-2. They are compiled directly at GitHub virtual environments
-3. Then they are uploaded into the external storage
-4. When you use this Action to install one of these crates,
-   it will be downloaded from this cache storage
-5. If crate was not found in the cache storage, usual `cargo install` will be invoked instead.
+Before calling your usual `cargo install` command, this Action
+attempts to download pre-build binary crate file from the binary crates cache.\
+See [Security considerations](#security-considerations) to read more
+about potential caveats and usage policy.
 
-As soon as https://github.com/actions-rs/meta/issues/21 will be implemented,
-this Action will also cache resulting binary in the GitHub cache after compilation.
+If requested crate does not exist in the crates cache storage,
+this Action will fall back to the usual `cargo install`.
+
+As soon as [actions-rs/meta#21](https://github.com/actions-rs/meta/issues/21) will be implemented,
+this Action will also cache compiled binary in the GitHub cache.
+
 
 ## Example workflow
 
@@ -53,18 +57,41 @@ jobs:
 
 ## Inputs
 
-| Name         | Required | Description              | Type   | Default |
-| ------------ | :------: | -------------------------| ------ | --------|
-| `crate`      | ✓        | Binary crate name        | string |         |
-| `version`    |          | Crate version to install | string | latest  |
+| Name             | Required | Description                                      | Type   | Default |
+| ---------------- | :------: | ------------------------------------------------ | ------ | --------|
+| `crate`          | ✓        | Binary crate name                                | string |         |
+| `version`        |          | Crate version to install                         | string | latest  |
+| `use-tool-cache` |          | Use pre-compiled crates to speed-up installation | bool   | false   |
 
-## Security considerations
+## Tool cache
 
-You should acknowledge that in order to speed up the crates installation,
-this Action uses pre-built binaries stored in the external storage.
+As it was mentioned in [How does it work?](#how-does-it-work) section,
+this Action can use external cache with the pre-compiled crates in it.
 
-Before using this Action consider checking the [Security considerations](https://github.com/actions-rs/tool-cache/blob/master/README.md#security-considerations) chapter
-of the tool cache builder to understand how this might affect you.
+In order to use it, you need to **explicitly** enable `use-tool-cache` input:
+
+```yaml
+- uses: actions-rs/install@master
+  with:
+    crate: cargo-audit
+    version: latest
+    use-tool-cache: true
+```
+
+Before enabling this input, you should acknowledge security risks
+of executing pre-compiled binaries in your CI workflows.
+
+### Security considerations
+
+Check the [`tool-cache`](https://github.com/actions-rs/tool-cache/) repo
+to under understand how binary crates are built, signed and uploaded to the external cache.
+
+This Action downloads both binary file and its signature.\
+Signature validation is proceeded by `openssl` and public key (`public.pem`)
+of the same certificate used for signing files at `tool-cache` repo.
+
+If signature validation fails, binary file is removed immediately,
+warning issued and fall back to the `cargo install` call happens.
 
 ## License
 

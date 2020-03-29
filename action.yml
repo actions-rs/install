@@ -12,8 +12,6 @@ inputs:
     description: Specify a version to install
     required: false
     default: 'latest'
-
-  # These inputs are not used/implemented yet
   use-tool-cache:
     description: Use tool cache to speed up installation (not used yet)
     required: false
