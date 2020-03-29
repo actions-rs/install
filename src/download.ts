@@ -3,19 +3,28 @@ import { promises as fs } from "fs";
 import path from "path";
 
 import * as core from "@actions/core";
+import * as exec from "@actions/exec";
 import * as tc from "@actions/tool-cache";
 import * as http from "@actions/http-client";
+
+const CLOUDFRONT_ROOT = "https://d1ad61wkrfbmp3.cloudfront.net";
+// Path, assuming we are executing from the repo root
+const CACHE_PUBLIC_KEY = "public.pem";
 
 function getRunner(): string {
     const platform = os.platform() as string;
     switch (platform) {
-        case "windows":
+        case "win32":
             return "windows-2019";
         case "darwin":
             return "macos-10.15";
         case "linux":
-            // TODO: Handle `ubuntu-16.04`
-            return "ubuntu-18.04";
+            // TODO: Is there better way to determine Actions runner OS?
+            if (os.release().startsWith("4.15")) {
+                return "ubuntu-16.04";
+            } else {
+                return "ubuntu-18.04";
+            }
         default:
             throw new Error("Unsupported OS");
     }
@@ -24,7 +33,7 @@ function getRunner(): string {
 function getExt(): string {
     const platform = os.platform() as string;
     switch (platform) {
-        case "windows":
+        case "win32":
             return ".exe";
         default:
             return "";
@@ -46,27 +55,12 @@ async function resolveVersion(crate: string): Promise<string> {
 }
 
 function buildUrl(crate: string, version: string): string {
-    /**
-     * !!! READ THIS IMPORTANT NOTICE !!!
-     *
-     * In case you want to use that binary cache bucket
-     * for your purposes, please, don't do that.
-     *
-     * It is strictly private and intended to be used
-     * by `@actions-rs` only.
-     * There are no stable folders, naming structure,
-     * bucket name or even the AWS region used.
-     * You are not doing yourself better
-     * by trying to trick everyone, just stop right now.
-     */
-    const s3Region = "us-east-2";
-    const s3Bucket = "actions-rs.install.binary-cache";
     const runner = getRunner();
     const ext = getExt();
 
     core.debug(`Determined current Actions runner OS: ${runner}`);
 
-    return `https://s3.${s3Region}.amazonaws.com/${s3Bucket}/${crate}/${runner}/${crate}-${version}${ext}`;
+    return `${CLOUDFRONT_ROOT}/${crate}/${runner}/${crate}-${version}${ext}`;
 }
 
 function targetPath(crate: string): string {
@@ -74,6 +68,18 @@ function targetPath(crate: string): string {
     const filename = `${crate}${ext}`;
 
     return path.join(os.homedir(), ".cargo", "bin", filename);
+}
+
+async function verify(crate: string, signature: string): Promise<void> {
+    await exec.exec("openssl", [
+        "dgst",
+        "-sha256",
+        "-verify",
+        CACHE_PUBLIC_KEY,
+        "-signature",
+        signature,
+        crate,
+    ]);
 }
 
 export async function downloadFromCache(
@@ -86,18 +92,38 @@ export async function downloadFromCache(
         core.info(`Newest ${crate} version available at crates.io: ${version}`);
     }
     const url = buildUrl(crate, version);
+    const signatureUrl = `${url}.sig`;
+
     const path = targetPath(crate);
+    const signaturePath = `${path}.sig`;
 
     core.debug(`Constructed S3 URL for ${crate}: ${url}`);
-    core.info(`Downloading ${crate} == ${version} into ${path}`);
 
     try {
         await fs.access(path);
 
         core.warning(`Crate ${crate} already exist at ${path}`);
     } catch (error) {
-        core.debug(`Downloading ${url} into ${path}`);
+        core.info(`Downloading ${crate} signature into ${signaturePath}`);
+        await tc.downloadTool(signatureUrl, signaturePath);
+
+        core.info(`Downloading ${crate} == ${version} into ${path}`);
         await tc.downloadTool(url, path);
+
+        try {
+            core.info("Starting signature verification process");
+            await verify(path, signaturePath);
+        } catch (error) {
+            core.warning(
+                `Unable to validate signature for downloaded ${crate}!`
+            );
+
+            // Remove downloaded files, as they are now considered dangerous now
+            await fs.unlink(path);
+            await fs.unlink(signaturePath);
+            throw error;
+        }
+
         await fs.chmod(path, 0o755);
     }
 }
