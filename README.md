@@ -12,6 +12,7 @@ This GitHub Action provides faster version of the `cargo install` command.
 
 **Table of Contents**
 
+* [Why?](#why)
 * [How does this works?](#how-does-it-work)
 * [Example workflow](#example-workflow)
 * [Inputs](#inputs)
@@ -20,6 +21,12 @@ This GitHub Action provides faster version of the `cargo install` command.
 * [GitHub cache](#github-cache)
 * [License](#license)
 * [Contribute and support](#contribute-and-support)
+
+## Why?
+
+If you are using binary crates (such as [`cargo-audit`](https://crates.io/crates/cargo-audit), [`grcov`](https://github.com/mozilla/grcov), [`cargo-geiger`](https://crates.io/crates/cargo-geiger) and so on) in your CI workflows, you might have noticed that compiling these crates each time is irritatingly slow.
+
+This Action speeds up the crates installation with some tricks, leading to a much faster job execution; crates are expected to be installed in a couple seconds.
 
 ## How does it work?
 
