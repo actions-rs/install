@@ -13,7 +13,7 @@ inputs:
     required: false
     default: 'latest'
   use-tool-cache:
-    description: Use tool cache to speed up installation (not used yet)
+    description: Use tool cache to speed up installation
     required: false
     default: false
   use-cache:

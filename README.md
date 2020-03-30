@@ -24,13 +24,12 @@ This GitHub Action provides faster version of the `cargo install` command.
 ## How does it work?
 
 Before calling your usual `cargo install` command, this Action
-attempts to download pre-build binary crate file from the binary crates cache.\
+attempts to download pre-build binary crate file from the binary crates cache.
 See [Security considerations](#security-considerations) to read more
 about potential caveats and usage policy.
 
 If requested crate does not exist in the crates cache storage,
-this Action will fall back to the usual `cargo install`.
-
+this Action will fall back to the usual `cargo install`.\
 As soon as [actions-rs/meta#21](https://github.com/actions-rs/meta/issues/21) will be implemented,
 this Action will also cache compiled binary in the GitHub cache.
 
@@ -48,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/install@master
+      - uses: actions-rs/install@v0.1
         with:
           crate: cargo-audit
           version: latest
@@ -66,12 +65,12 @@ jobs:
 ## Tool cache
 
 As it was mentioned in [How does it work?](#how-does-it-work) section,
-this Action can use external cache with the pre-compiled crates in it.
+this Action can use external pre-compiled crates cache.
 
-In order to use it, you need to **explicitly** enable `use-tool-cache` input:
+In order to enable this functionaliy, you need to **explicitly** enable `use-tool-cache` input:
 
 ```yaml
-- uses: actions-rs/install@master
+- uses: actions-rs/install@v0.1
   with:
     crate: cargo-audit
     version: latest
@@ -79,16 +78,17 @@ In order to use it, you need to **explicitly** enable `use-tool-cache` input:
 ```
 
 Before enabling this input, you should acknowledge security risks
-of executing pre-compiled binaries in your CI workflows.
+of executing binaries compiled for you by a third party in your CI workflows.
 
 ### Security considerations
 
 Check the [`tool-cache`](https://github.com/actions-rs/tool-cache/) repo
-to under understand how binary crates are built, signed and uploaded to the external cache.
+to understand how binary crates are built, signed and uploaded into the external cache.
 
-This Action downloads both binary file and its signature.\
-Signature validation is proceeded by `openssl` and public key (`public.pem`)
-of the same certificate used for signing files at `tool-cache` repo.
+This Action downloads both binary file and its signature.
+Signature validation is proceeded by `openssl` by using public key
+of the same certificate used for signing files at `tool-cache` repo.\
+Public key is stored in this repository at `public.pem`.
 
 If signature validation fails, binary file is removed immediately,
 warning issued and fall back to the `cargo install` call happens.
