@@ -1,6 +1,6 @@
 {
   "name": "rust-cargo-install",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Install a Rust binary crate as fast as possible",
   "main": "lib/main.js",
   "scripts": {

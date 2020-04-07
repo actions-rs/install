@@ -8,8 +8,10 @@ import * as tc from "@actions/tool-cache";
 import * as http from "@actions/http-client";
 
 const CLOUDFRONT_ROOT = "https://d1ad61wkrfbmp3.cloudfront.net";
-// Path, assuming we are executing from the repo root
-const CACHE_PUBLIC_KEY = "public.pem";
+// Path to the public key of the sign certificate.
+// It is resolved either from compiled `dist/index.js` during usual Action run,
+// or from this one file and always points to the file at the repo root.
+const CACHE_PUBLIC_KEY = path.resolve(__dirname, "..", "public.pem");
 
 function getRunner(): string {
     const platform = os.platform() as string;
