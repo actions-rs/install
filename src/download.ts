@@ -32,16 +32,6 @@ function getRunner(): string {
     }
 }
 
-function getExt(): string {
-    const platform = os.platform() as string;
-    switch (platform) {
-        case "win32":
-            return ".exe";
-        default:
-            return "";
-    }
-}
-
 async function resolveVersion(crate: string): Promise<string> {
     const url = `https://crates.io/api/v1/crates/${crate}`;
     const client = new http.HttpClient(
@@ -58,18 +48,23 @@ async function resolveVersion(crate: string): Promise<string> {
 
 function buildUrl(crate: string, version: string): string {
     const runner = getRunner();
-    const ext = getExt();
 
     core.debug(`Determined current Actions runner OS: ${runner}`);
 
-    return `${CLOUDFRONT_ROOT}/${crate}/${runner}/${crate}-${version}${ext}`;
+    return `${CLOUDFRONT_ROOT}/${crate}/${runner}/${crate}-${version}.zip`;
 }
 
-function targetPath(crate: string): string {
-    const ext = getExt();
-    const filename = `${crate}${ext}`;
+function binPath(): string {
+    return path.join(os.homedir(), ".cargo", "bin");
+}
 
-    return path.join(os.homedir(), ".cargo", "bin", filename);
+/**
+ * Build download path
+ */
+function targetPath(crate: string): string {
+    const filename = `${crate}.zip`;
+
+    return path.join(os.tmpdir(), filename);
 }
 
 async function verify(crate: string, signature: string): Promise<void> {
@@ -115,6 +110,10 @@ export async function downloadFromCache(
         try {
             core.info("Starting signature verification process");
             await verify(path, signaturePath);
+
+            const cargoBinPath = binPath();
+            core.info(`Extracting files into ${cargoBinPath}`);
+            await tc.extractZip(path, cargoBinPath);
         } catch (error) {
             core.warning(
                 `Unable to validate signature for downloaded ${crate}!`

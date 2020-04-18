@@ -58,3 +58,23 @@ jobs:
           crate: bat
           use-tool-cache: true
       - run: bat package.json
+
+  multiple_binary_targets:
+    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macOS-latest
+          - windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install wasm-bindgen-cli
+        uses: ./
+        with:
+          crate: wasm-bindgen-cli
+          version: 0.2.60
+          use-tool-cache: true
+      - run: test -f ~/.cargo/bin/wasm-bindgen
+        shell: bash
