@@ -103,8 +103,10 @@ export async function install(
             args.push("--features");
             args.push(options.features.join(","));
         }
+
         args.push("--root");
         args.push(installRoot);
+        args.push("--no-track");
 
         try {
             core.startGroup(`Installing ${crate}`);
@@ -121,9 +123,10 @@ export async function install(
 
     const files = await fs.readdir(installRoot);
     for (const file of files) {
+        const source = path.join(installRoot, file);
         const target = path.join(targetDir, path.basename(file));
-        core.debug(`Copying ${file} to ${target}`);
-        await fs.copyFile(file, target);
+        core.debug(`Copying ${source} to ${target}`);
+        await fs.copyFile(source, target);
     }
 
     core.debug(`Removing temporary install root at ${installRoot}`);
