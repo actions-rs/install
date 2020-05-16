@@ -17,7 +17,7 @@ jobs:
       - run: npm run build
       - run: npm run test
 
-  install_from_tool_cache:
+  install_with_cache:
     needs: test
     runs-on: ${{ matrix.os }}
     strategy:
@@ -33,31 +33,12 @@ jobs:
         uses: ./
         with:
           crate: sccache
-          use-tool-cache: true
       - run: sccache --help
-
-  disabled_tool_cache:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+      # Second execution should have cache filled
       - name: Install sccache
         uses: ./
         with:
           crate: sccache
-      - run: sccache --help
-
-  install_missing_from_tool_cache:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install bat
-        uses: ./
-        with:
-          crate: bat
-          use-tool-cache: true
-      - run: bat package.json
 
   multiple_binary_targets:
     needs: test
@@ -75,6 +56,5 @@ jobs:
         with:
           crate: wasm-bindgen-cli
           version: 0.2.60
-          use-tool-cache: true
       - run: test -f ~/.cargo/bin/wasm-bindgen
         shell: bash

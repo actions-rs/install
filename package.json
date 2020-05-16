@@ -29,6 +29,7 @@
   "homepage": "https://github.com/actions-rs/install",
   "dependencies": {
     "@actions-rs/core": "0.0.9",
+    "@actions/cache": "^0.1.0",
     "@actions/core": "^1.2.3",
     "@actions/exec": "^1.0.3",
     "@actions/http-client": "^1.0.7",

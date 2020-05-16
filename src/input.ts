@@ -8,20 +8,23 @@ import { input } from "@actions-rs/core";
 export interface Input {
     crate: string;
     version: string;
-    useToolCache: boolean;
-    useCache: boolean;
+    features: string[];
+    allFeatures: boolean;
+    noDefaultFeatures: boolean;
 }
 
 export function get(): Input {
     const crate = input.getInput("crate", { required: true });
     const version = input.getInput("version", { required: true });
-    const useToolCache = input.getInputBool("use-tool-cache") || false;
-    const useCache = input.getInputBool("use-cache") || true;
+    const features = input.getInputList("features");
+    const allFeatures = input.getInputBool("all-features") || false;
+    const noDefaultFeatures = input.getInputBool("no-default-features") || false;
 
     return {
-        crate: crate,
-        version: version,
-        useToolCache: useToolCache,
-        useCache: useCache,
+        crate,
+        version,
+        features,
+        allFeatures,
+        noDefaultFeatures,
     };
 }

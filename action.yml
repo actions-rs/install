@@ -11,7 +11,13 @@ inputs:
   version:
     description: Specify a version to install
     required: false
-    default: 'latest'
+    default: '*'
+  all-features:
+    description: Activate all available features
+    required: false
+  no-default-features:
+    description: Do not activate the `default` feature
+    required: false
   use-tool-cache:
     description: Use tool cache to speed up installation
     required: false
