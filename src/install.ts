@@ -121,7 +121,7 @@ export async function install(
     const targetDir = path.join(os.homedir(), ".cargo", "bin");
     core.debug(`Copying files from the ${installRoot} into ${targetDir}`);
 
-    const copyRoot = path.join(installRoot, 'bin');
+    const copyRoot = path.join(installRoot, "bin");
     const files = await fs.readdir(copyRoot);
     for (const file of files) {
         const source = path.join(copyRoot, file);
