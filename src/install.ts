@@ -76,7 +76,16 @@ export async function install(
 
     // If missing in cache, crate will be installed into this installation root.
     // Note that binaries will be at `${installRoot}/bin` after `cargo install` execution.
-    const installRoot = path.join(os.tmpdir(), "actions-rs-install", crate);
+    //
+    // We can't use smth like `os.tmpdir()`, `@actions/cache` requires that
+    // files should be in `$WORKSPACE`.
+    const workspace = process.env["GITHUB_WORKSPACE"] ?? process.cwd();
+    const installRoot = path.join(
+        workspace,
+        "target",
+        "actions-rs-install",
+        crate
+    );
     await fs.mkdir(installRoot, {
         recursive: true,
     });
