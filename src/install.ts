@@ -95,7 +95,7 @@ export async function install(
     console.log("Cache restoration result", result);
 
     // There is no cache entry, installing it manually.
-    if (result === undefined) {
+    if (!result) {
         const cargo = await Cargo.get();
         const args = ["install", crate];
         if (version !== "latest" && version !== "*") {
