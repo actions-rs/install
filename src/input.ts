@@ -18,7 +18,8 @@ export function get(): Input {
     const version = input.getInput("version", { required: true });
     const features = input.getInputList("features");
     const allFeatures = input.getInputBool("all-features") || false;
-    const noDefaultFeatures = input.getInputBool("no-default-features") || false;
+    const noDefaultFeatures =
+        input.getInputBool("no-default-features") || false;
 
     return {
         crate,

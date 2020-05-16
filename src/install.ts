@@ -36,14 +36,13 @@ function getRunner(): string {
     }
 }
 
-function makeCacheKey(crate: string, version: string, options: Options): string {
+function makeCacheKey(
+    crate: string,
+    version: string,
+    options: Options
+): string {
     // TODO: Mix up runner OS
-    const parts = [
-        CACHE_KEY_PREFIX,
-        getRunner(),
-        crate,
-        version,
-    ];
+    const parts = [CACHE_KEY_PREFIX, getRunner(), crate, version];
 
     if (options.noDefaultFeatures) {
         parts.push("no-default-features");
@@ -67,7 +66,11 @@ function makeCacheKey(crate: string, version: string, options: Options): string 
     return parts.join(CACHE_KEY_SEPARATOR);
 }
 
-export async function install(crate: string, version: string, options: Options): Promise<void> {
+export async function install(
+    crate: string,
+    version: string,
+    options: Options
+): Promise<void> {
     const cacheKey = makeCacheKey(crate, version, options);
     core.debug(`Cache key for ${crate} == ${version}: "${cacheKey}"`);
 
@@ -75,35 +78,32 @@ export async function install(crate: string, version: string, options: Options):
     // Note that binaries will be at `${installRoot}/bin` after `cargo install` execution.
     const installRoot = path.join(os.tmpdir(), "actions-rs-install", crate);
     await fs.mkdir(installRoot, {
-        recursive: true
+        recursive: true,
     });
 
     core.debug(`Restoring cache into ${installRoot}`);
     const result = await cache.restoreCache([installRoot], cacheKey, []);
-    console.log('Cache restoration result', result);
+    console.log("Cache restoration result", result);
 
     // There is no cache entry, installing it manually.
     if (result === undefined) {
         const cargo = await Cargo.get();
-        const args = [
-            "install",
-            crate,
-        ];
-        if (version !== 'latest' && version !== '*') {
-            args.push('--version');
+        const args = ["install", crate];
+        if (version !== "latest" && version !== "*") {
+            args.push("--version");
             args.push(version);
         }
         if (options.allFeatures) {
-            args.push('--all-features');
+            args.push("--all-features");
         }
         if (options.noDefaultFeatures) {
-            args.push('--no-default-features');
+            args.push("--no-default-features");
         }
         if (options.features.length > 0) {
             args.push("--features");
             args.push(options.features.join(","));
         }
-        args.push('--root');
+        args.push("--root");
         args.push(installRoot);
 
         try {
