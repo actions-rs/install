@@ -140,5 +140,7 @@ export async function install(
     }
 
     core.debug(`Removing temporary install root at ${installRoot}`);
-    fs.unlink(installRoot);
+    await fs.rmdir(installRoot, {
+        recursive: true,
+    });
 }
