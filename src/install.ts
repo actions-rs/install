@@ -6,8 +6,7 @@ import * as core from "@actions/core";
 import * as cache from "@actions/cache";
 import { Cargo } from "@actions-rs/core";
 
-const CACHE_KEY_PREFIX = "actions-rs-install";
-const CACHE_KEY_SEPARATOR = "-";
+const CACHE_KEY_PREFIX = "actions-rs";
 
 export interface Options {
     features: string[];
@@ -36,19 +35,26 @@ function getRunner(): string {
     }
 }
 
+/**
+ * Cache key format is:
+ *
+ * {static_prefix}_{crate_name}_{version}[{+features}]_{github_runner}
+ *
+ * Example:
+ *
+ * "actions-rs_wasm-pack_latest+feature1.feature2_ubuntu-18.04"
+ */
 function makeCacheKey(
     crate: string,
-    version: string,
+    version: string | null,
     options: Options
 ): string {
-    // TODO: Mix up runner OS
-    const parts = [CACHE_KEY_PREFIX, getRunner(), crate, version];
-
+    const features = [];
     if (options.noDefaultFeatures) {
-        parts.push("no-default-features");
+        features.push("no-default-features");
     }
     if (options.allFeatures) {
-        parts.push("all-features");
+        features.push("all-features");
     }
 
     // TODO: resulting cache key can't exceed 512 characters.
@@ -56,19 +62,27 @@ function makeCacheKey(
     // but we should probably hash the features list in order not to
     // exceed it.
     if (options.features) {
-        const features = options.features;
-        features.sort();
-        for (const feature of features) {
-            parts.push(feature);
+        options.features.sort();
+        for (const feature of options.features) {
+            features.push(feature);
         }
     }
 
-    return parts.join(CACHE_KEY_SEPARATOR);
+    const parts = [CACHE_KEY_PREFIX, "_", crate, "_", version ?? "latest"];
+
+    if (features.length > 0) {
+        parts.push("+");
+        parts.push(features.join("."));
+    }
+    parts.push("_");
+    parts.push(getRunner());
+
+    return parts.join("");
 }
 
 export async function install(
     crate: string,
-    version: string,
+    version: string | null,
     options: Options
 ): Promise<void> {
     const cacheKey = makeCacheKey(crate, version, options);
@@ -98,7 +112,7 @@ export async function install(
     if (!result) {
         const cargo = await Cargo.get();
         const args = ["install", crate];
-        if (version !== "latest" && version !== "*") {
+        if (version) {
             args.push("--version");
             args.push(version);
         }
