@@ -15,6 +15,6 @@ describe("actions-rs/install/input", () => {
         const result = input.get();
 
         expect(result.crate).toBe("cross");
-        expect(result.version).toBe("latest");
+        expect(result.version).toBeNull();
     });
 });
