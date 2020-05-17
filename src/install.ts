@@ -6,7 +6,7 @@ import * as core from "@actions/core";
 import * as cache from "@actions/cache";
 import { Cargo } from "@actions-rs/core";
 
-const CACHE_KEY_PREFIX = "actions-rs";
+const CACHE_KEY_PREFIX = "1actions-rs";
 
 export interface Options {
     features: string[];
