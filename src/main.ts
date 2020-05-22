@@ -19,8 +19,8 @@ async function main(): Promise<void> {
 
         await run(actionInput);
     } catch (error) {
-        core.setFailed(error.message);
+        core.setFailed((<Error>error).message);
     }
 }
 
-main();
+void main();

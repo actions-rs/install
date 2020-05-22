@@ -86,7 +86,8 @@ export async function install(
     options: Options
 ): Promise<void> {
     const cacheKey = makeCacheKey(crate, version, options);
-    core.debug(`Cache key for ${crate} == ${version}: "${cacheKey}"`);
+    const logVersion = version ?? "*";
+    core.debug(`Cache key for ${crate} == ${logVersion}: "${cacheKey}"`);
 
     // If missing in cache, crate will be installed into this installation root.
     // Note that binaries will be at `${installRoot}/bin` after `cargo install` execution.
