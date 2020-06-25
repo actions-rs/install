@@ -16,10 +16,12 @@ inputs:
     description: Use tool cache to speed up installation
     required: false
     default: false
-  use-cache:
-    description: Store installed binary in the GitHub Actions cache (not used yet)
+  key:
+    description: Store installed binary in the GitHub Actions cache with the specified key
     required: false
-    default: true
+  restore-keys:
+    description: Restore keys as used in the GitHub cache action
+    required: false
 
 runs:
   using: 'node12'

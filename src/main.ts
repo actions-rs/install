@@ -6,7 +6,8 @@ import * as download from "./download";
 
 interface Options {
     useToolCache: boolean;
-    useCache: boolean;
+    primaryKey?: string;
+    restoreKeys?: string[];
 }
 
 async function downloadFromToolCache(
@@ -52,7 +53,12 @@ export async function run(
     } catch (error) {
         core.info("Falling back to the `cargo install` command");
         const cargo = await Cargo.get();
-        await cargo.installCached(crate, version);
+        await cargo.installCached(
+            crate,
+            version,
+            options.primaryKey,
+            options.restoreKeys
+        );
     }
 }
 
@@ -62,7 +68,8 @@ async function main(): Promise<void> {
 
         await run(actionInput.crate, actionInput.version, {
             useToolCache: actionInput.useToolCache,
-            useCache: actionInput.useCache,
+            primaryKey: actionInput.primaryKey,
+            restoreKeys: actionInput.restoreKeys,
         });
     } catch (error) {
         core.setFailed(error.message);
