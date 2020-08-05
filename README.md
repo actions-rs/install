@@ -13,7 +13,7 @@ This GitHub Action provides faster version of the `cargo install` command.
 **Table of Contents**
 
 * [Why?](#why)
-* [How does this works?](#how-does-it-work)
+* [How does this work?](#how-does-it-work)
 * [Example workflow](#example-workflow)
 * [Inputs](#inputs)
 * [Tool cache](#tool-cache)
