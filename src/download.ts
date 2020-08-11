@@ -113,6 +113,7 @@ export async function downloadFromCache(
 
             const cargoBinPath = binPath();
             core.info(`Extracting files into ${cargoBinPath}`);
+            await fs.unlink(cargoBinPath + crate);
             await tc.extractZip(path, cargoBinPath);
         } catch (error) {
             core.warning(
