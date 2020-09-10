@@ -6,8 +6,7 @@ import * as download from "./download";
 
 interface Options {
     useToolCache: boolean;
-    primaryKey?: string;
-    restoreKeys?: string[];
+    useCache: boolean;
 }
 
 async function downloadFromToolCache(
@@ -29,36 +28,25 @@ export async function run(
     version: string,
     options: Options
 ): Promise<void> {
-    try {
-        if (options.useToolCache) {
-            try {
-                core.info(
-                    "Tool cache is explicitly enabled via the Action input"
-                );
-                core.startGroup("Downloading from the tool cache");
+    if (options.useToolCache) {
+        try {
+            core.info("Tool cache is explicitly enabled via the Action input");
+            core.startGroup("Downloading from the tool cache");
 
-                return await downloadFromToolCache(crate, version);
-            } finally {
-                core.endGroup();
-            }
-        } else {
-            core.info(
-                "Tool cache is disabled in the Action inputs, skipping it"
-            );
-
-            throw new Error(
-                "Faster installation options either failed or disabled"
-            );
+            return await downloadFromToolCache(crate, version);
+        } finally {
+            core.endGroup();
         }
-    } catch (error) {
-        core.info("Falling back to the `cargo install` command");
+    } else if (options.useCache) {
+        core.info("GitHub Actions cache is used to install the tool");
         const cargo = await Cargo.get();
-        await cargo.installCached(
-            crate,
-            version,
-            options.primaryKey,
-            options.restoreKeys
+        await cargo.installCached(crate, version);
+    } else {
+        core.info(
+            "Cache is disabled. Falling back to the `cargo install` command"
         );
+        const cargo = await Cargo.get();
+        await cargo.install(crate, version);
     }
 }
 
@@ -68,8 +56,7 @@ async function main(): Promise<void> {
 
         await run(actionInput.crate, actionInput.version, {
             useToolCache: actionInput.useToolCache,
-            primaryKey: actionInput.primaryKey,
-            restoreKeys: actionInput.restoreKeys,
+            useCache: actionInput.useCache,
         });
     } catch (error) {
         core.setFailed(error.message);
