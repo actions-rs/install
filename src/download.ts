@@ -21,12 +21,19 @@ function getRunner(): string {
         case "darwin":
             return "macos-10.15";
         case "linux":
-            // TODO: Is there better way to determine Actions runner OS?
-            if (os.release().startsWith("4.15")) {
-                return "ubuntu-16.04";
-            } else {
-                return "ubuntu-18.04";
+            for (const line of require("fs")
+                .readFileSync("/etc/os-release", {
+                    encoding: "utf8",
+                })
+                .split("\n")) {
+                if (line.startsWith("VERSION_ID=")) {
+                    return (
+                        "ubuntu-" + line.substring(10).replaceAll(/["']/g, "")
+                    );
+                }
             }
+
+            throw new Error("Unrecognized version of Ubuntu");
         default:
             throw new Error("Unsupported OS");
     }
